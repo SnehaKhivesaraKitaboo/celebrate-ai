@@ -89,13 +89,37 @@ The suite covers dates, event validation, budget totals, deadlines, invalid and 
 
 ## Deployment
 
-Target host: Google Cloud Run. One container serves the API and the static files. This repository has not been deployed, and a live Gemini request has not been confirmed against a deployed URL.
+The browser files and the Express API stay separate. Nothing in this repository has been deployed, and a live Gemini request has not been confirmed against a deployed URL.
+
+### Frontend: Firebase Hosting
+
+Firebase project: `celebrate-ai-promptwars`.
+
+`firebase deploy` builds `hosting-dist/` from `public/` and `shared/`, then uploads that directory. The published site keeps the same URLs the app already uses, including `/shared/`. `hosting-dist/` is generated and gitignored. No API key is included.
 
 ```bash
-gcloud run deploy celebrate-ai --source . --region REGION --allow-unauthenticated --set-secrets GEMINI_API_KEY=gemini-api-key:latest
+firebase login
+firebase deploy --only hosting --project celebrate-ai-promptwars
 ```
 
-Replace `REGION` and the secret name with your project values. Cloud Run injects `PORT`. Do not bake `GEMINI_API_KEY` into the image or the git history.
+### Backend: Cloud Run
+
+Keep the Express server on Cloud Run in the same Google Cloud project. Cloud Run injects `PORT`. Pass `GEMINI_API_KEY` as a runtime secret. Do not put that key in Hosting files or the image.
+
+```bash
+gcloud run deploy celebrate-ai --source . --project celebrate-ai-promptwars --region REGION --allow-unauthenticated --set-secrets GEMINI_API_KEY=gemini-api-key:latest
+```
+
+Replace `REGION` and the secret name with your project values. After the service exists, add this rewrite to `firebase.json` inside `hosting` so the pages can keep calling `/api` on the Hosting origin:
+
+```json
+"rewrites": [{
+  "source": "/api/**",
+  "run": { "serviceId": "celebrate-ai", "region": "REGION" }
+}]
+```
+
+Deploy Hosting again after adding the rewrite. Until that rewrite exists, the Hosting site can load the dashboard, and plan generation has no API behind it.
 
 - The container runs as the `node` user and starts with `node server/index.js`.
 - The rate limit is in memory, so each instance counts separately. `req.ip` is the connecting address. Behind Cloud Run that is the proxy address unless the platform's forwarded IP is trusted. This app does not enable open proxy trust.

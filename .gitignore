@@ -11,6 +11,10 @@ node_modules/
 npm-debug.log*
 coverage/
 
+# Generated Firebase Hosting files
+hosting-dist/
+.firebase/
+
 # OS and editor files
 .DS_Store
 Thumbs.db

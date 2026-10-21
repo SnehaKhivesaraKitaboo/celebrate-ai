@@ -18,7 +18,7 @@ Put your Gemini API key in `.env`. The key stays on the server. Do not commit `.
 npm start
 ```
 
-Open http://localhost:3000. The process reads `PORT` and listens on `0.0.0.0`, so Cloud Run and a local browser can both reach it. `npm start` loads `.env` when that file exists and does not override variables already set in the environment.
+Open http://localhost:3000. `npm start` loads `.env` when that file exists and does not override variables already set in the environment. The local process reads `PORT` and listens on `0.0.0.0`.
 
 Without `GEMINI_API_KEY`, the site still runs. Generating or revising a plan returns "AI planning is not configured on this server" and does not invent a plan. Budget, timeline, and quotation edits continue to work on a plan already saved in the browser.
 
@@ -61,10 +61,10 @@ Costs are planning estimates. The app does not name real vendors or claim verifi
 
 - `server/` — Express, security headers, rate limit, Gemini client, plan and replan routes.
 - `shared/` — validation, budget totals, deadlines, plan schema, and replan rules. The browser and the server both use these files.
-- `public/` — the dashboard. No framework and no API key. Pages call `/api/plan` and `/api/replan` on the same origin.
+- `public/` — the dashboard. No framework and no API key. `public/js/apiConfig.js` exports an empty `API_BASE`, so local pages call relative `/api/plan` and `/api/replan`.
 - Gemini model: `gemini-3.5-flash-lite` through `@google/genai`, using JSON schema output. Override the model with `GEMINI_MODEL`.
 
-The browser and API are one service. The Content Security Policy allows connections only to `'self'`, and the server does not add a cross-origin allow-list. Deploy the page and the API together. API failures return a short `error` and `code`. They do not return stack traces or the API key. A missing key is HTTP 503, a timeout is 504, and a provider or malformed model response is 502.
+Locally, Express serves the pages and the API on one origin. On Firebase Hosting the pages are static, and the API runs as a Vercel Hobby function. `ALLOWED_ORIGINS` allows only `https://celebrate-ai-promptwars.web.app` and `https://celebrate-ai-promptwars.firebaseapp.com`. Set `API_BASE_URL` to the Vercel origin when publishing Hosting; the prepare script writes that origin into `hosting-dist/js/apiConfig.js` and adds it to `connect-src`. API failures return a short `error` and `code`. They do not return stack traces or the API key. A missing key is HTTP 503, a timeout is 504, and a provider or malformed model response is 502.
 
 ## Environment variables
 
@@ -72,12 +72,14 @@ Set these in `.env` locally or in the host's runtime configuration. Never commit
 
 | Name | Required | Purpose |
 |---|---|---|
-| `PORT` | No | Listen port. Default 3000. Cloud Run sets this, usually to 8080. |
+| `PORT` | No | Listen port for `npm start`. Default 3000. Vercel does not use this value. |
 | `GEMINI_API_KEY` | For live plans | Server-only Gemini key. Leave unset to run without planning. |
 | `GEMINI_MODEL` | No | Default `gemini-3.5-flash-lite`. |
 | `AI_TIMEOUT_MS` | No | Model timeout. Default 30000. |
 | `PLAN_RATE_MAX` | No | Plan and replan requests per IP per window. Default 10. |
 | `PLAN_RATE_WINDOW_MS` | No | Rate-limit window. Default 900000. |
+| `ALLOWED_ORIGINS` | For the hosted site | Comma-separated Hosting origins allowed to call the API. Any other origin is ignored. Leave unset locally. |
+| `API_BASE_URL` | When publishing Hosting | Public https origin of the Vercel project. Hosting prepare script only. Leave unset until that URL exists. |
 
 ## Tests
 
@@ -89,52 +91,54 @@ The suite covers dates, event validation, budget totals, deadlines, invalid and 
 
 ## Deployment
 
-The browser files and the Express API stay separate. Nothing in this repository has been deployed, and a live Gemini request has not been confirmed against a deployed URL.
+Firebase Hosting stays on the Spark plan and serves the static dashboard at `https://celebrate-ai-promptwars.web.app`. The Express API is a Vercel Hobby function. Spark Hosting cannot run Node, so the published pages call the Vercel origin directly once `API_BASE_URL` is set.
+
+`GEMINI_API_KEY` belongs in the Vercel project environment. Do not put it in frontend files, `hosting-dist/`, `vercel.json`, or Firebase config. Use the Hobby plan and do not add a payment method.
+
+### Backend: Vercel Hobby
+
+`app.js` exports the existing Express app for Vercel. `npm start` still runs `server/index.js` and is the local server. Vercel looks for that root `app.js` entry, so the project root must be this `celebrate-ai` directory.
+
+`vercel.json` sets the function `maxDuration` to 60 seconds. Hobby allows up to 300 seconds. Gemini uses `AI_TIMEOUT_MS` (default 30 seconds), and the browser stops waiting after 40 seconds.
+
+Set these environment variables on the Vercel project. Leave them out of git:
+
+| Name | Value |
+|---|---|
+| `GEMINI_API_KEY` | Server-side Gemini key |
+| `ALLOWED_ORIGINS` | `https://celebrate-ai-promptwars.web.app,https://celebrate-ai-promptwars.firebaseapp.com` |
+
+Optional variables are `GEMINI_MODEL`, `AI_TIMEOUT_MS`, `PLAN_RATE_MAX`, and `PLAN_RATE_WINDOW_MS`. Vercel does not use `PORT`.
+
+The rate limit is in memory, so each instance counts separately. `req.ip` is the connecting address. This app does not trust forwarded client IPs.
+
+On Vercel, `express.static()` is not used. Firebase Hosting serves `public/` and `shared/`. Use `https://celebrate-ai-promptwars.web.app` for the dashboard.
 
 ### Frontend: Firebase Hosting
 
-Firebase project: `celebrate-ai-promptwars`.
+`firebase deploy` runs `scripts/prepare-firebase-hosting.js`, which copies `public/` and `shared/` into `hosting-dist/`. That directory is gitignored. The script reads `API_BASE_URL` from the environment, or from `.env` when the environment variable is unset. It ignores every other `.env` entry, including `GEMINI_API_KEY`.
 
-`firebase deploy` builds `hosting-dist/` from `public/` and `shared/`, then uploads that directory. The published site keeps the same URLs the app already uses, including `/shared/`. `hosting-dist/` is generated and gitignored. No API key is included.
+Leave `API_BASE_URL` unset until Vercel shows the project URL. With it unset, Hosting keeps relative `/api` URLs and `connect-src 'self'`.
+
+After the URL exists, set `API_BASE_URL` to that https origin with no path (for example `https://your-project.vercel.app`) and deploy Hosting:
 
 ```bash
 firebase login
 firebase deploy --only hosting --project celebrate-ai-promptwars
 ```
 
-### Backend: Cloud Run
+The prepare script then writes the origin into `hosting-dist/js/apiConfig.js` and adds it to `connect-src` in `firebase.json`. Commit that `firebase.json` change. It contains the public API origin, not the Gemini key.
 
-Keep the Express server on Cloud Run in the same Google Cloud project. Cloud Run injects `PORT`. Pass `GEMINI_API_KEY` as a runtime secret. Do not put that key in Hosting files or the image.
-
-```bash
-gcloud run deploy celebrate-ai --source . --project celebrate-ai-promptwars --region REGION --allow-unauthenticated --set-secrets GEMINI_API_KEY=gemini-api-key:latest
-```
-
-Replace `REGION` and the secret name with your project values. After the service exists, add this rewrite to `firebase.json` inside `hosting` so the pages can keep calling `/api` on the Hosting origin:
-
-```json
-"rewrites": [{
-  "source": "/api/**",
-  "run": { "serviceId": "celebrate-ai", "region": "REGION" }
-}]
-```
-
-Deploy Hosting again after adding the rewrite. Until that rewrite exists, the Hosting site can load the dashboard, and plan generation has no API behind it.
-
-- The container runs as the `node` user and starts with `node server/index.js`.
-- The rate limit is in memory, so each instance counts separately. `req.ip` is the connecting address. Behind Cloud Run that is the proxy address unless the platform's forwarded IP is trusted. This app does not enable open proxy trust.
-- Static files are cached for one hour. After a deploy, wait or change the revision URL before judging an old page.
+Static files are cached for one hour. After a Hosting deploy, wait or bypass the cache before judging an old page.
 
 ### Checks after you deploy
 
-Run these against the Cloud Run URL. They are not a substitute for a successful deploy check in this repository.
-
-1. `GET /api/health` returns `{"status":"ok"}`.
-2. The site loads over HTTPS, and the browser console has no errors.
+1. `GET https://<vercel-host>/api/health` returns `{"status":"ok"}`.
+2. The Hosting page loads over HTTPS, and the browser console has no errors.
 3. View source and the network log. `GEMINI_API_KEY` does not appear.
-4. Submit a real event and confirm `POST /api/plan` returns a plan with a summary, budget items, timeline, and disclaimer.
+4. Submit a real event and confirm `POST /api/plan` on the Vercel host returns a plan with a summary, budget items, timeline, and disclaimer.
 5. Ask for a budget change that keeps the same guest count. Confirm the guest count stays and the budget total updates.
 6. Reload the page and confirm the plan is still in this browser.
 7. Submit an invalid date and confirm the form rejects it without calling the model.
 
-Push only source files. `node_modules/` and `.env` are gitignored.
+Push only source files. `node_modules/`, `.env`, and `.vercel/` are gitignored.

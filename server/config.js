@@ -1,6 +1,20 @@
 const DEFAULT_PORT = 3000;
 const DEFAULT_MODEL = 'gemini-3.5-flash-lite';
 const DEFAULT_TIMEOUT_MS = 30_000;
+const FIREBASE_HOSTING_ORIGINS = new Set([
+  'https://celebrate-ai-promptwars.web.app',
+  'https://celebrate-ai-promptwars.firebaseapp.com',
+]);
+
+export function parseAllowedOrigins(value) {
+  if (typeof value !== 'string' || !value.trim()) return Object.freeze([]);
+  const selected = [];
+  for (const part of value.split(',')) {
+    const origin = part.trim();
+    if (FIREBASE_HOSTING_ORIGINS.has(origin) && !selected.includes(origin)) selected.push(origin);
+  }
+  return Object.freeze(selected);
+}
 
 function parsePort(value) {
   const port = Number.parseInt(value ?? '', 10);
@@ -22,5 +36,6 @@ export function loadConfig(env = process.env) {
     aiTimeoutMs: parsePositiveInt(env.AI_TIMEOUT_MS, DEFAULT_TIMEOUT_MS),
     planRateMax: parsePositiveInt(env.PLAN_RATE_MAX, 10),
     planRateWindowMs: parsePositiveInt(env.PLAN_RATE_WINDOW_MS, 15 * 60 * 1000),
+    allowedOrigins: parseAllowedOrigins(env.ALLOWED_ORIGINS),
   });
 }

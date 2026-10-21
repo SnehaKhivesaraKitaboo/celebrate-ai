@@ -1,7 +1,7 @@
 import express from 'express';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { securityHeaders, jsonBody } from './middleware/security.js';
+import { securityHeaders, jsonBody, crossOriginApi, corsAllowList } from './middleware/security.js';
 import { apiNotFound, errorHandler } from './middleware/errorHandler.js';
 import { healthRoutes } from './routes/healthRoutes.js';
 import { planRoutes } from './routes/planRoutes.js';
@@ -16,7 +16,7 @@ export function createApp({ config = loadConfig(), planService = createPlanServi
   app.disable('x-powered-by');
 
   app.use(securityHeaders());
-  app.use('/api', jsonBody(), healthRoutes(), planRoutes(planService, {
+  app.use('/api', crossOriginApi(), corsAllowList(config.allowedOrigins), jsonBody(), healthRoutes(), planRoutes(planService, {
     windowMs: config.planRateWindowMs,
     max: config.planRateMax,
   }), apiNotFound);

@@ -15,6 +15,9 @@ coverage/
 hosting-dist/
 .firebase/
 
+# Local Vercel project link
+.vercel/
+
 # OS and editor files
 .DS_Store
 Thumbs.db

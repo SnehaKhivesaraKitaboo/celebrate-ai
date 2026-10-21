@@ -1,3 +1,5 @@
+import { API_BASE } from './apiConfig.js';
+
 const FALLBACK = Object.freeze({
   not_configured: 'AI planning is not configured on this server.',
   timeout: 'The planning request timed out. Please try again.',
@@ -6,6 +8,11 @@ const FALLBACK = Object.freeze({
   rate_limited: 'Too many planning requests. Please wait and try again.',
   invalid_event: 'Check the event details.',
 });
+
+export function apiUrl(path, base = API_BASE) {
+  const normalized = String(base ?? '').replace(/\/+$/, '');
+  return `${normalized}${path}`;
+}
 
 export class PlanRequestError extends Error {
   constructor(message, { status = 0, code = '', fields = null } = {}) {
@@ -21,7 +28,7 @@ export class PlanRequestError extends Error {
 export async function requestPlan(event, { fetchImpl = fetch, timeoutMs = 40_000 } = {}) {
   let response;
   try {
-    response = await fetchImpl('/api/plan', {
+    response = await fetchImpl(apiUrl('/api/plan'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
       body: JSON.stringify(event),
@@ -49,7 +56,7 @@ export async function requestPlan(event, { fetchImpl = fetch, timeoutMs = 40_000
 export async function requestReplan(event, plan, change, { fetchImpl = fetch, timeoutMs = 40_000 } = {}) {
   let response;
   try {
-    response = await fetchImpl('/api/replan', {
+    response = await fetchImpl(apiUrl('/api/replan'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
       body: JSON.stringify({ event, plan, change }),

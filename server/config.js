@@ -1,5 +1,5 @@
 const DEFAULT_PORT = 3000;
-const DEFAULT_MODEL = 'gemini-3.8-flash';
+const DEFAULT_MODEL = 'gemini-3.5-flash-lite';
 const DEFAULT_TIMEOUT_MS = 30_000;
 
 function parsePort(value) {

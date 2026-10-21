@@ -62,7 +62,7 @@ Costs are planning estimates. The app does not name real vendors or claim verifi
 - `server/` — Express, security headers, rate limit, Gemini client, plan and replan routes.
 - `shared/` — validation, budget totals, deadlines, plan schema, and replan rules. The browser and the server both use these files.
 - `public/` — the dashboard. No framework and no API key. Pages call `/api/plan` and `/api/replan` on the same origin.
-- Gemini model: `gemini-3.8-flash` through `@google/genai`, using JSON schema output. Override the model with `GEMINI_MODEL`.
+- Gemini model: `gemini-3.5-flash-lite` through `@google/genai`, using JSON schema output. Override the model with `GEMINI_MODEL`.
 
 The browser and API are one service. The Content Security Policy allows connections only to `'self'`, and the server does not add a cross-origin allow-list. Deploy the page and the API together. API failures return a short `error` and `code`. They do not return stack traces or the API key. A missing key is HTTP 503, a timeout is 504, and a provider or malformed model response is 502.
 
@@ -74,7 +74,7 @@ Set these in `.env` locally or in the host's runtime configuration. Never commit
 |---|---|---|
 | `PORT` | No | Listen port. Default 3000. Cloud Run sets this, usually to 8080. |
 | `GEMINI_API_KEY` | For live plans | Server-only Gemini key. Leave unset to run without planning. |
-| `GEMINI_MODEL` | No | Default `gemini-3.8-flash`. |
+| `GEMINI_MODEL` | No | Default `gemini-3.5-flash-lite`. |
 | `AI_TIMEOUT_MS` | No | Model timeout. Default 30000. |
 | `PLAN_RATE_MAX` | No | Plan and replan requests per IP per window. Default 10. |
 | `PLAN_RATE_WINDOW_MS` | No | Rate-limit window. Default 900000. |

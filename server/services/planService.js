@@ -29,6 +29,7 @@ export async function requestModelPlan(event, client, timeoutMs) {
     if (isTimeout(err, signal)) {
       throw new AppError(504, 'The planning request timed out. Please try again.', 'timeout');
     }
+    console.error(`AI plan rejected: provider ${err?.status ?? err?.name ?? 'error'}`);
     throw new AppError(502, 'The planning service is unavailable. Please try again.', 'unavailable');
   }
 

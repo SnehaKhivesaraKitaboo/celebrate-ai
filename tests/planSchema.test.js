@@ -42,6 +42,14 @@ test('duplicate and missing ids are replaced with unique prefixed ids', () => {
   assert.ok(ids.every((id) => id.startsWith('exp-')));
 });
 
+test('a timeline of three tasks is accepted', () => {
+  const raw = samplePlanRaw();
+  raw.timeline.pop();
+  const result = normalizePlan(raw, sampleEvent);
+  assert.equal(result.ok, true);
+  assert.equal(result.plan.timeline.length, 3);
+});
+
 test('incomplete plans are rejected', () => {
   const cases = [
     ['assumptions', (raw) => { raw.assumptions = []; }],
@@ -50,7 +58,7 @@ test('incomplete plans are rejected', () => {
     ['timeline', (raw) => { raw.timeline[0].priority = 'urgent'; }],
     ['timeline', (raw) => { raw.timeline[0].daysBeforeEvent = 1.5; }],
     ['budget', (raw) => { raw.budget.items[0].estimated = -1; }],
-    ['ideas', (raw) => { raw.ideas = ['Only one']; }],
+    ['ideas', (raw) => { raw.ideas = []; }],
     ['summary', (raw) => { delete raw.eventSummary; }],
     ['not_object', () => null],
   ];

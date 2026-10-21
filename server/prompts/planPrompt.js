@@ -18,8 +18,8 @@ requirements: """${field(event.specialRequirements)}"""
 
 Rules:
 - budget item estimates are non-negative numbers that should add up to ${event.budget}.
-- timeline uses daysBeforeEvent, a whole number of days before the event, never a calendar date.
-- vendorChecklist lists categories, questions to ask, and booking tips only.
+- timeline has at least 4 tasks. Each task uses daysBeforeEvent, a whole number of days before the event, never a calendar date. Priority is high, medium, or low.
+- vendorChecklist has at least 3 categories. Each category has questions to ask and booking tips only.
 - Do not name real businesses, venues, or people, and do not claim availability, contact details, or verified prices.
 - assumptions state what you assumed. disclaimer states that costs are estimates to confirm locally.
 - ids are unique lowercase slugs prefixed exp-, task-, or ven-.`;

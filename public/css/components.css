@@ -1,0 +1,201 @@
+:where(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+.btn {
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+}
+
+.btn-primary {
+  --bs-btn-bg: var(--color-teal);
+  --bs-btn-border-color: var(--color-teal);
+  --bs-btn-hover-bg: var(--color-teal-strong);
+  --bs-btn-hover-border-color: var(--color-teal-strong);
+  --bs-btn-active-bg: var(--color-teal-strong);
+  --bs-btn-active-border-color: var(--color-teal-strong);
+  --bs-btn-disabled-bg: var(--color-teal);
+  --bs-btn-disabled-border-color: var(--color-teal);
+}
+
+.btn-outline-danger {
+  --bs-btn-color: var(--color-danger);
+  --bs-btn-border-color: var(--color-danger);
+  --bs-btn-hover-bg: var(--color-danger);
+  --bs-btn-hover-border-color: var(--color-danger);
+}
+
+.eyebrow {
+  margin: 0 0 var(--space-1);
+  color: var(--color-purple);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.panel {
+  padding: var(--space-5);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-sm);
+}
+
+.panel-title {
+  margin: 0 0 var(--space-4);
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+}
+
+.text-muted-strong {
+  color: var(--color-text-muted);
+}
+
+.empty-state {
+  max-width: 36rem;
+  padding: var(--space-7) var(--space-6);
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-lg);
+  background: linear-gradient(135deg, var(--color-surface) 0%, var(--color-purple-soft) 140%);
+}
+
+.empty-state h2 {
+  font-size: var(--font-size-xl);
+  font-weight: 700;
+}
+
+.empty-state p {
+  color: var(--color-text-muted);
+}
+
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 10rem), 1fr));
+  gap: var(--space-4);
+}
+
+.stat-card {
+  padding: var(--space-4) var(--space-5);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-sm);
+}
+
+.stat-card--accent {
+  border-color: transparent;
+  background: var(--color-teal);
+  color: #fff;
+}
+
+.stat-label {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+}
+
+.stat-card--accent .stat-label {
+  color: var(--color-teal-soft);
+}
+
+.stat-value {
+  margin: var(--space-1) 0 0;
+  font-size: clamp(var(--font-size-lg), 4vw, var(--font-size-xl));
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+
+.stat-meta {
+  margin: var(--space-1) 0 0;
+  font-size: var(--font-size-sm);
+}
+
+.detail-list {
+  display: grid;
+  grid-template-columns: minmax(8rem, max-content) 1fr;
+  gap: var(--space-3) var(--space-5);
+  margin: 0;
+}
+
+.detail-list dt {
+  color: var(--color-text-muted);
+  font-weight: 500;
+}
+
+.detail-list dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+  white-space: pre-line;
+}
+
+.tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tag {
+  padding: 0.125rem var(--space-3);
+  border-radius: 999px;
+  background: var(--color-purple-soft);
+  color: var(--color-purple);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+}
+
+.menu-toggle {
+  display: inline-grid;
+  place-items: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  padding: 0;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+}
+
+.menu-toggle-bar,
+.menu-toggle-bar::before,
+.menu-toggle-bar::after {
+  display: block;
+  width: 1.125rem;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--color-text);
+}
+
+.menu-toggle-bar {
+  position: relative;
+}
+
+.menu-toggle-bar::before,
+.menu-toggle-bar::after {
+  position: absolute;
+  content: "";
+}
+
+.menu-toggle-bar::before {
+  inset-block-start: -6px;
+}
+
+.menu-toggle-bar::after {
+  inset-block-start: 6px;
+}
+
+@media (max-width: 575.98px) {
+  .detail-list {
+    grid-template-columns: 1fr;
+    gap: var(--space-1);
+  }
+
+  .detail-list dd {
+    margin-block-end: var(--space-3);
+  }
+}

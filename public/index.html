@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="CelebrateAI helps you plan weddings, birthdays, anniversaries, and community events.">
+  <meta name="theme-color" content="#0F5E63">
+  <title>CelebrateAI — Event Planning Assistant</title>
+  <link rel="icon" href="/assets/logo.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
+        integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+  <link rel="stylesheet" href="/css/tokens.css">
+  <link rel="stylesheet" href="/css/layout.css">
+  <link rel="stylesheet" href="/css/components.css">
+  <link rel="stylesheet" href="/css/form.css">
+  <link rel="stylesheet" href="/css/plan.css">
+  <script type="module" src="/js/main.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to main content</a>
+
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar" aria-label="Primary">
+      <a class="brand" href="#overview">
+        <img src="/assets/logo.svg" alt="" width="32" height="32">
+        <span>Celebrate<span class="brand-accent">AI</span></span>
+      </a>
+      <nav>
+        <ul class="nav-list">
+          <li><a class="nav-link-item" href="#overview" data-nav="overview">Overview</a></li>
+          <li><a class="nav-link-item" href="#event" data-nav="event">Event details</a></li>
+          <li><a class="nav-link-item" href="#plan" data-nav="plan">Event plan</a></li>
+        </ul>
+      </nav>
+      <p class="sidebar-note">Your plan is stored only in this browser.</p>
+    </aside>
+
+    <div class="main-column">
+      <header class="topbar">
+        <button class="menu-toggle" type="button" aria-controls="sidebar" aria-expanded="false" data-menu-toggle>
+          <span class="menu-toggle-bar" aria-hidden="true"></span>
+          <span class="visually-hidden">Open navigation</span>
+        </button>
+        <p class="topbar-title" id="topbar-title">Overview</p>
+      </header>
+
+      <main id="main" tabindex="-1">
+        <p class="visually-hidden" role="status" aria-live="polite" id="app-status"></p>
+
+        <section class="view" data-view="overview" aria-labelledby="overview-heading">
+          <div class="view-header">
+            <div>
+              <p class="eyebrow">Dashboard</p>
+              <h1 id="overview-heading" tabindex="-1">Your celebration at a glance</h1>
+            </div>
+          </div>
+
+          <div class="empty-state" data-overview-empty>
+            <h2>Start with the essentials</h2>
+            <p>Tell us the type of event, the date, where it is, how many guests, and your budget.</p>
+            <a class="btn btn-primary" href="#event">Add event details</a>
+          </div>
+
+          <div data-overview-content hidden>
+            <div class="stat-grid" data-overview-stats></div>
+            <div class="row g-4 mt-1">
+              <div class="col-lg-7">
+                <article class="panel" aria-labelledby="details-heading">
+                  <h2 class="panel-title" id="details-heading">Event details</h2>
+                  <dl class="detail-list" data-overview-details></dl>
+                </article>
+              </div>
+              <div class="col-lg-5">
+                <article class="panel" aria-labelledby="manage-heading">
+                  <h2 class="panel-title" id="manage-heading">Manage event</h2>
+                  <p class="text-muted-strong" data-overview-saved></p>
+                  <p data-overview-plan></p>
+                  <div class="d-flex flex-wrap gap-2">
+                    <a class="btn btn-primary" href="#event">Edit details</a>
+                    <button class="btn btn-outline-danger" type="button" data-clear-event>Delete saved event</button>
+                  </div>
+                </article>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="view" data-view="event" aria-labelledby="event-heading" hidden>
+          <div class="view-header">
+            <div>
+              <p class="eyebrow">Step 1</p>
+              <h1 id="event-heading" tabindex="-1">Event details</h1>
+              <p class="view-lead">Fields marked <span aria-hidden="true">*</span><span class="visually-hidden">with an asterisk</span> are required.</p>
+            </div>
+          </div>
+
+          <form class="panel event-form" id="event-form" novalidate>
+            <div class="error-summary" role="alert" tabindex="-1" data-error-summary hidden>
+              <h2>Please fix the following</h2>
+              <ul data-error-list></ul>
+            </div>
+
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label" for="event-type">Event type <span class="req" aria-hidden="true">*</span></label>
+                <select class="form-select" id="event-type" name="eventType" required aria-describedby="event-type-error">
+                  <option value="">Select an event type</option>
+                </select>
+                <p class="invalid-feedback" id="event-type-error"></p>
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label" for="event-date">Event date <span class="req" aria-hidden="true">*</span></label>
+                <input class="form-control" type="date" id="event-date" name="eventDate" required aria-describedby="event-date-error">
+                <p class="invalid-feedback" id="event-date-error"></p>
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label" for="city">City <span class="req" aria-hidden="true">*</span></label>
+                <input class="form-control" type="text" id="city" name="city" required maxlength="80" autocomplete="address-level2" aria-describedby="city-error">
+                <p class="invalid-feedback" id="city-error"></p>
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label" for="guest-count">Number of guests <span class="req" aria-hidden="true">*</span></label>
+                <input class="form-control" type="number" id="guest-count" name="guestCount" required min="1" max="5000" step="1" inputmode="numeric" aria-describedby="guest-count-error">
+                <p class="invalid-feedback" id="guest-count-error"></p>
+              </div>
+
+              <div class="col-md-8">
+                <label class="form-label" for="budget">Total budget <span class="req" aria-hidden="true">*</span></label>
+                <input class="form-control" type="number" id="budget" name="budget" required min="1" step="any" inputmode="decimal" aria-describedby="budget-error">
+                <p class="invalid-feedback" id="budget-error"></p>
+              </div>
+
+              <div class="col-md-4">
+                <label class="form-label" for="currency">Currency <span class="req" aria-hidden="true">*</span></label>
+                <select class="form-select" id="currency" name="currency" required aria-describedby="currency-error"></select>
+                <p class="invalid-feedback" id="currency-error"></p>
+              </div>
+
+              <div class="col-12">
+                <label class="form-label" for="theme">Theme or style <span class="optional">(optional)</span></label>
+                <input class="form-control" type="text" id="theme" name="theme" maxlength="80" aria-describedby="theme-hint theme-error">
+                <p class="form-hint" id="theme-hint">For example: rustic garden, Bollywood night, minimalist.</p>
+                <p class="invalid-feedback" id="theme-error"></p>
+              </div>
+
+              <div class="col-12">
+                <fieldset aria-describedby="dietary-error">
+                  <legend class="form-label">Dietary preferences <span class="optional">(optional)</span></legend>
+                  <div class="check-grid" data-dietary-options></div>
+                  <p class="invalid-feedback" id="dietary-error"></p>
+                </fieldset>
+              </div>
+
+              <div class="col-12">
+                <label class="form-label" for="special-requirements">Special requirements <span class="optional">(optional)</span></label>
+                <textarea class="form-control" id="special-requirements" name="specialRequirements" rows="4" maxlength="500"
+                          aria-describedby="special-hint special-count special-error"></textarea>
+                <div class="d-flex justify-content-between gap-3">
+                  <p class="form-hint" id="special-hint">Accessibility needs, venue preferences, cultural rituals. Please don't include names or contact details.</p>
+                  <p class="form-hint text-nowrap" id="special-count" data-char-count></p>
+                </div>
+                <p class="invalid-feedback" id="special-error"></p>
+              </div>
+            </div>
+
+            <p class="request-error" role="alert" tabindex="-1" data-request-error hidden></p>
+            <div class="form-actions">
+              <button class="btn btn-primary btn-lg" type="submit" aria-describedby="submit-hint">Generate event plan</button>
+              <p class="form-hint" id="submit-hint">Details are sent to the server to generate a plan and are not stored there.</p>
+            </div>
+          </form>
+        </section>
+
+        <section class="view" data-view="plan" aria-labelledby="plan-heading" hidden>
+          <div class="view-header">
+            <div>
+              <p class="eyebrow">Generated plan</p>
+              <h1 id="plan-heading" tabindex="-1">Event plan</h1>
+            </div>
+            <button class="btn btn-quiet no-print" type="button" data-print-plan hidden>Print summary</button>
+          </div>
+
+          <div class="empty-state" data-plan-empty>
+            <h2>No plan yet</h2>
+            <p>Add your event details and generate a plan. If generation fails, nothing is invented in its place.</p>
+            <a class="btn btn-primary" href="#event">Add event details</a>
+          </div>
+
+          <div class="plan-stack" data-plan-content hidden>
+            <p class="plan-disclaimer screen-only" data-plan-disclaimer></p>
+            <p class="plan-note screen-only" data-plan-estimate-note></p>
+            <article class="panel screen-only" aria-labelledby="plan-summary-heading">
+              <h2 class="panel-title" id="plan-summary-heading">Summary</h2>
+              <p data-plan-summary></p>
+              <h3 class="line-title" data-plan-theme-name></h3>
+              <p data-plan-theme-description></p>
+              <ul class="tag-list" data-plan-palette></ul>
+            </article>
+            <div data-plan-budget></div>
+            <div data-plan-timeline></div>
+            <div data-plan-vendors></div>
+            <div class="plan-split screen-only">
+              <div data-plan-ideas></div>
+              <div data-plan-assumptions></div>
+            </div>
+            <section class="panel no-print" aria-labelledby="replan-heading">
+              <h2 class="panel-title" id="replan-heading">Adjust the plan</h2>
+              <p class="plan-note">Describe one change. Guest count, budget, and other details stay as they are unless you ask to change them.</p>
+              <form data-replan-form>
+                <label class="form-label" for="replan-change">What should change?</label>
+                <textarea class="form-control" id="replan-change" name="change" rows="3" maxlength="500" required></textarea>
+                <p class="form-hint" id="replan-hint">For example: Change the budget to ₹20,000 and keep 50 guests.</p>
+                <p class="request-error" role="alert" tabindex="-1" data-replan-error hidden></p>
+                <div class="form-actions">
+                  <button class="btn btn-primary" type="submit" aria-describedby="replan-hint">Update plan</button>
+                </div>
+              </form>
+            </section>
+            <div class="screen-only" data-replan-result></div>
+            <div data-print-summary></div>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+</body>
+</html>

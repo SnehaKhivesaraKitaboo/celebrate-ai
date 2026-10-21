@@ -1,0 +1,117 @@
+.event-form {
+  max-width: 52rem;
+}
+
+.form-label,
+legend.form-label {
+  margin-block-end: var(--space-1);
+  font-size: var(--font-size-base);
+  font-weight: 600;
+}
+
+.req {
+  color: var(--color-danger);
+}
+
+.optional {
+  color: var(--color-text-muted);
+  font-weight: 400;
+}
+
+.form-control,
+.form-select {
+  min-height: 2.75rem;
+  border-color: var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  background-color: var(--color-surface);
+}
+
+.form-control:focus,
+.form-select:focus {
+  border-color: var(--color-focus);
+}
+
+.form-hint {
+  margin: var(--space-1) 0 0;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.invalid-feedback {
+  margin: var(--space-1) 0 0;
+  font-weight: 500;
+}
+
+.invalid-feedback:not(:empty) {
+  display: block;
+}
+
+.check-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr));
+  gap: var(--space-2) var(--space-4);
+}
+
+.form-check-input {
+  border-color: var(--color-border-strong);
+}
+
+.form-check-input:checked {
+  border-color: var(--color-teal);
+  background-color: var(--color-teal);
+}
+
+.error-summary {
+  margin-block-end: var(--space-5);
+  padding: var(--space-4) var(--space-5);
+  border: 1px solid var(--color-danger);
+  border-inline-start-width: 4px;
+  border-radius: var(--radius-sm);
+  background: var(--color-danger-soft);
+}
+
+.error-summary h2 {
+  margin: 0 0 var(--space-2);
+  color: var(--color-danger);
+  font-size: var(--font-size-base);
+  font-weight: 700;
+}
+
+.error-summary ul {
+  margin: 0;
+  padding-inline-start: var(--space-5);
+}
+
+.error-summary a {
+  color: var(--color-danger);
+}
+
+.request-error {
+  margin: var(--space-4) 0 0;
+  color: var(--color-danger);
+  font-weight: 600;
+}
+
+.request-error:focus {
+  outline: none;
+}
+
+.form-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--space-2);
+  margin-block-start: var(--space-5);
+  padding-block-start: var(--space-5);
+  border-block-start: 1px solid var(--color-border);
+}
+
+.form-actions .btn {
+  align-self: flex-end;
+}
+
+@media (max-width: 575.98px) {
+  .form-actions .btn {
+    width: 100%;
+  }
+}

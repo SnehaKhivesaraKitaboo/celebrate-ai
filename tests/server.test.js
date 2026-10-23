@@ -51,6 +51,7 @@ test('sends security headers and hides the framework', async () => {
   const csp = res.headers.get('content-security-policy');
   assert.match(csp, /default-src 'self'/);
   assert.match(csp, /script-src 'self'/);
+  assert.match(csp, /firebasevertexai\.googleapis\.com/);
   assert.doesNotMatch(csp, /script-src[^;]*cdn\.jsdelivr\.net/);
   assert.match(csp, /object-src 'none'/);
   assert.equal(res.headers.get('x-content-type-options'), 'nosniff');

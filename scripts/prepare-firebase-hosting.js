@@ -72,23 +72,10 @@ export function firebaseConfigWithApiOrigin(text, origin) {
   return text.slice(0, index) + updated + text.slice(index + current.length);
 }
 
-function readEnvText() {
-  const envPath = path.join(root, '.env');
-  return fs.existsSync(envPath) ? fs.readFileSync(envPath, 'utf8') : '';
-}
-
 function main() {
-  const origin = resolveConfiguredApiBase(process.env, readEnvText());
   fs.rmSync(destination, { recursive: true, force: true });
   fs.cpSync(path.join(root, 'public'), destination, { recursive: true });
   fs.cpSync(path.join(root, 'shared'), path.join(destination, 'shared'), { recursive: true });
-  if (!origin) return;
-
-  fs.writeFileSync(path.join(destination, 'js', 'apiConfig.js'), apiConfigModuleSource(origin));
-  const firebasePath = path.join(root, 'firebase.json');
-  const current = fs.readFileSync(firebasePath, 'utf8');
-  const next = firebaseConfigWithApiOrigin(current, origin);
-  if (next !== current) fs.writeFileSync(firebasePath, next);
 }
 
 const isDirectRun = process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href;

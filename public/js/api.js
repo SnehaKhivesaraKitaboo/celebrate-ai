@@ -1,4 +1,9 @@
-import { API_BASE } from './apiConfig.js';
+import { toISODate } from '../../shared/dates.js';
+import { normalizePlan } from '../../shared/planSchema.js';
+import { buildPlanPrompt } from '../../shared/planPrompt.js';
+import { buildReplanPrompt } from '../../shared/replanPrompt.js';
+import { cleanChange, finalizeReplan } from '../../shared/replan.js';
+import { createPlanner, firebaseReady } from './planner.js';
 
 const FALLBACK = Object.freeze({
   not_configured: 'AI planning is not configured on this server.',
@@ -6,13 +11,7 @@ const FALLBACK = Object.freeze({
   unavailable: 'The planning service is unavailable. Please try again.',
   invalid_response: 'The planner returned an unusable response. Please try again.',
   rate_limited: 'Too many planning requests. Please wait and try again.',
-  invalid_event: 'Check the event details.',
 });
-
-export function apiUrl(path, base = API_BASE) {
-  const normalized = String(base ?? '').replace(/\/+$/, '');
-  return `${normalized}${path}`;
-}
 
 export class PlanRequestError extends Error {
   constructor(message, { status = 0, code = '', fields = null } = {}) {
@@ -24,57 +23,63 @@ export class PlanRequestError extends Error {
   }
 }
 
-/** Sends event details to the server. Never invents a plan when the request fails. */
-export async function requestPlan(event, { fetchImpl = fetch, timeoutMs = 40_000 } = {}) {
-  let response;
+function parseModelJson(text) {
+  if (typeof text !== 'string') return null;
+  const trimmed = text.trim().replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '');
   try {
-    response = await fetchImpl(apiUrl('/api/plan'), {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-      body: JSON.stringify(event),
-      signal: AbortSignal.timeout(timeoutMs),
-    });
-  } catch (err) {
-    if (err?.name === 'TimeoutError' || err?.name === 'AbortError') {
-      throw new PlanRequestError(FALLBACK.timeout, { code: 'timeout' });
-    }
-    throw new PlanRequestError('The planning request failed. Please try again.', { code: 'unavailable' });
+    return JSON.parse(trimmed);
+  } catch {
+    return null;
   }
-
-  const body = await response.json().catch(() => ({}));
-  if (!response.ok) {
-    const message = typeof body.error === 'string' ? body.error : (FALLBACK[body.code] || 'The planning request failed. Please try again.');
-    throw new PlanRequestError(message, { status: response.status, code: body.code || '', fields: body.fields ?? null });
-  }
-  if (!body.plan || typeof body.plan !== 'object') {
-    throw new PlanRequestError(FALLBACK.invalid_response, { status: response.status, code: 'invalid_response' });
-  }
-  return body.plan;
 }
 
-/** Sends the current plan and one change. A failure leaves the caller holding the previous plan. */
-export async function requestReplan(event, plan, change, { fetchImpl = fetch, timeoutMs = 40_000 } = {}) {
-  let response;
+function mapProviderError(err) {
+  const name = err?.name ?? '';
+  const code = String(err?.code ?? err?.status ?? '');
+  const message = String(err?.message ?? '');
+  if (name === 'TimeoutError' || name === 'AbortError' || /timeout|deadline/i.test(message)) {
+    return new PlanRequestError(FALLBACK.timeout, { code: 'timeout' });
+  }
+  if (code === '429' || /resource-exhausted|quota|too many/i.test(message)) {
+    return new PlanRequestError(FALLBACK.rate_limited, { code: 'rate_limited' });
+  }
+  return new PlanRequestError(FALLBACK.unavailable, { code: 'unavailable' });
+}
+
+function plannerFor(client) {
+  if (client) return client;
+  if (!firebaseReady()) return null;
+  return createPlanner();
+}
+
+/** Asks Firebase AI Logic for a plan. Never invents one when the request fails. */
+export async function requestPlan(event, { client, timeoutMs = 40_000 } = {}) {
+  const planner = plannerFor(client);
+  if (!planner) throw new PlanRequestError(FALLBACK.not_configured, { code: 'not_configured' });
+  let text;
   try {
-    response = await fetchImpl(apiUrl('/api/replan'), {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-      body: JSON.stringify({ event, plan, change }),
-      signal: AbortSignal.timeout(timeoutMs),
-    });
+    text = await planner.generateJson(buildPlanPrompt(event), { schema: 'plan', timeoutMs });
   } catch (err) {
-    if (err?.name === 'TimeoutError' || err?.name === 'AbortError') {
-      throw new PlanRequestError(FALLBACK.timeout, { code: 'timeout' });
-    }
-    throw new PlanRequestError('The planning request failed. Please try again.', { code: 'unavailable' });
+    throw mapProviderError(err);
   }
-  const body = await response.json().catch(() => ({}));
-  if (!response.ok) {
-    const message = typeof body.error === 'string' ? body.error : (FALLBACK[body.code] || 'The planning request failed. Please try again.');
-    throw new PlanRequestError(message, { status: response.status, code: body.code || '' });
+  const normalized = normalizePlan(parseModelJson(text), event);
+  if (!normalized.ok) throw new PlanRequestError(FALLBACK.invalid_response, { code: 'invalid_response' });
+  return normalized.plan;
+}
+
+/** Revises the current plan. A failure leaves the caller holding the previous plan. */
+export async function requestReplan(event, plan, change, { client, timeoutMs = 40_000 } = {}) {
+  const request = cleanChange(change);
+  if (!request) throw new PlanRequestError('Describe the change you want.', { code: 'invalid_change' });
+  const planner = plannerFor(client);
+  if (!planner) throw new PlanRequestError(FALLBACK.not_configured, { code: 'not_configured' });
+  let text;
+  try {
+    text = await planner.generateJson(buildReplanPrompt(event, plan, request), { schema: 'replan', timeoutMs });
+  } catch (err) {
+    throw mapProviderError(err);
   }
-  if (!body.plan || !body.event) {
-    throw new PlanRequestError(FALLBACK.invalid_response, { status: response.status, code: 'invalid_response' });
-  }
-  return body;
+  const revised = finalizeReplan(event, plan, parseModelJson(text), request, toISODate(new Date()));
+  if (!revised?.ok) throw new PlanRequestError(FALLBACK.invalid_response, { code: 'invalid_response' });
+  return revised;
 }

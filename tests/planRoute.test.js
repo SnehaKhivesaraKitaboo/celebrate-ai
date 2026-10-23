@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync, readdirSync, statSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import path from 'node:path';
 import { createApp } from '../server/app.js';
 import { createPlanService } from '../server/services/planService.js';
@@ -161,7 +161,7 @@ test('the planning route is rate limited', async () => {
   }
 });
 
-test('browser source does not contain the API key or the Gemini SDK', () => {
+test('browser source does not contain the server Gemini key or the server SDK', () => {
   const root = path.resolve('public');
   const files = [];
   const walk = (dir) => {
@@ -173,5 +173,15 @@ test('browser source does not contain the API key or the Gemini SDK', () => {
   };
   walk(root);
   const source = files.map((file) => readFileSync(file, 'utf8')).join('\n');
-  assert.doesNotMatch(source, /GEMINI_API_KEY|@google\/genai|AIza/);
+  const config = readFileSync(path.resolve('public/js/firebasePublicConfig.js'), 'utf8');
+  const firebaseKey = config.match(/apiKey: '([^']*)'/)?.[1] ?? '';
+  assert.match(firebaseKey, /^AIza/);
+  const withoutFirebaseKey = source.split(firebaseKey).join('');
+  assert.doesNotMatch(withoutFirebaseKey, /GEMINI_API_KEY|@google\/genai|AIza/);
+  const envPath = path.resolve('.env');
+  if (!existsSync(envPath)) return;
+  const serverKey = readFileSync(envPath, 'utf8').match(/^GEMINI_API_KEY=(.*)$/m)?.[1]?.trim().replace(/^['"]|['"]$/g, '') ?? '';
+  if (serverKey && (serverKey === firebaseKey || source.includes(serverKey))) {
+    assert.fail('browser source contains the server Gemini key');
+  }
 });

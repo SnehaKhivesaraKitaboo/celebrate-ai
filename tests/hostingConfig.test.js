@@ -1,7 +1,8 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { requestPlan, requestReplan, apiUrl } from '../public/js/api.js';
+import { requestPlan, requestReplan } from '../public/js/api.js';
+import { sampleEvent, samplePlanRaw } from './samplePlan.js';
 import {
   apiConfigModuleSource,
   cspWithApiOrigin,
@@ -11,22 +12,25 @@ import {
 
 const CSP = "default-src 'self'; connect-src 'self'; font-src 'self'";
 
-test('local API calls stay on relative /api paths', () => {
-  assert.equal(apiUrl('/api/plan'), '/api/plan');
-  assert.equal(apiUrl('/api/replan'), '/api/replan');
-  assert.equal(apiUrl('/api/plan', 'https://svc.onrender.com'), 'https://svc.onrender.com/api/plan');
-  assert.equal(apiUrl('/api/replan', 'https://svc.onrender.com/'), 'https://svc.onrender.com/api/replan');
+test('the dashboard calls Firebase AI Logic and does not embed a Gemini key', () => {
+  const api = readFileSync(new URL('../public/js/api.js', import.meta.url), 'utf8');
+  const planner = readFileSync(new URL('../public/js/planner.js', import.meta.url), 'utf8');
+  const config = readFileSync(new URL('../public/js/firebasePublicConfig.js', import.meta.url), 'utf8');
+  assert.match(planner, /GoogleAIBackend/);
+  assert.doesNotMatch(`${api}\n${planner}\n${config}`, /GEMINI_API_KEY|AgentPlatformBackend|VertexAIBackend|\/api\/plan/);
 });
 
-test('request helpers use the configured base', async () => {
+test('request helpers use the injected model client', async () => {
   const seen = [];
-  const fetchImpl = async (url) => {
-    seen.push(url);
-    return new Response(JSON.stringify({ plan: { name: 'Plan' }, event: { name: 'Event' } }), { status: 200 });
+  const client = {
+    async generateJson(prompt) {
+      seen.push(prompt.slice(0, 12));
+      return '{}';
+    },
   };
-  await requestPlan({ name: 'Event' }, { fetchImpl });
-  await requestReplan({ name: 'Event' }, { name: 'Plan' }, 'smaller budget', { fetchImpl });
-  assert.deepEqual(seen, ['/api/plan', '/api/replan']);
+  await assert.rejects(() => requestPlan(sampleEvent, { client }), /unusable/);
+  await assert.rejects(() => requestReplan(sampleEvent, samplePlanRaw(), 'smaller budget', { client }), /unusable/);
+  assert.equal(seen.length, 2);
 });
 
 test('API base comes from the environment and stays out of the CSP until it is set', () => {
@@ -74,6 +78,7 @@ test('firebase.json connect-src is updated in place when the origin is known', (
 test('committed Hosting CSP has no backend origin yet', () => {
   const json = JSON.parse(readFileSync(new URL('../firebase.json', import.meta.url), 'utf8'));
   const csp = json.hosting.headers[0].headers.find((header) => header.key === 'Content-Security-Policy').value;
-  assert.match(csp, /connect-src 'self'/);
-  assert.doesNotMatch(csp, /onrender\.com|localhost/);
+  assert.match(csp, /connect-src 'self' https:\/\/firebasevertexai\.googleapis\.com/);
+  assert.match(csp, /https:\/\/content-firebaseappcheck\.googleapis\.com/);
+  assert.doesNotMatch(csp, /onrender\.com|localhost|vercel\.app|generativelanguage\.googleapis\.com/);
 });

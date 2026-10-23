@@ -1,2 +1,2 @@
-// Empty keeps /api on this origin. Hosting publish replaces this file when API_BASE_URL is set.
+// Unused. The dashboard calls Firebase AI Logic directly and does not use a separate API origin.
 export const API_BASE = '';

@@ -2,6 +2,10 @@ import express from 'express';
 import helmet from 'helmet';
 
 const CDN_ORIGIN = 'https://cdn.jsdelivr.net';
+const FIREBASE_SDK = 'https://www.gstatic.com';
+const RECAPTCHA = 'https://www.google.com';
+const AI_LOGIC = 'https://firebasevertexai.googleapis.com';
+const APP_CHECK = 'https://content-firebaseappcheck.googleapis.com';
 const JSON_BODY_LIMIT = '32kb';
 
 export function securityHeaders() {
@@ -9,12 +13,13 @@ export function securityHeaders() {
     contentSecurityPolicy: {
       directives: {
         defaultSrc: ["'self'"],
-        scriptSrc: ["'self'"],
+        scriptSrc: ["'self'", FIREBASE_SDK, RECAPTCHA],
         styleSrc: ["'self'", CDN_ORIGIN],
         imgSrc: ["'self'", 'data:'],
-        connectSrc: ["'self'"],
+        connectSrc: ["'self'", AI_LOGIC, APP_CHECK, RECAPTCHA, FIREBASE_SDK],
         fontSrc: ["'self'", CDN_ORIGIN],
         objectSrc: ["'none'"],
+        frameSrc: [RECAPTCHA, 'https://recaptcha.google.com'],
         frameAncestors: ["'none'"],
         baseUri: ["'self'"],
         formAction: ["'self'"],

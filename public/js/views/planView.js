@@ -1,7 +1,8 @@
 import { toISODate } from '../../../shared/dates.js';
 import { acceptReplan } from '../../../shared/replan.js';
+import { EVENT_TYPES } from '../../../shared/constants.js';
 import { el, announce } from '../dom.js';
-import { formatCurrency, formatDate } from '../format.js';
+import { formatCurrency, formatDate, formatNumber } from '../format.js';
 import { requestReplan } from '../api.js';
 import { buildPlanModel } from './planModel.js';
 import { budgetEditor, timelineEditor, vendorEditor } from './planEditors.js';
@@ -9,6 +10,26 @@ import { buildPrintSections, formatChangeValue } from './planPrint.js';
 
 const ESTIMATE_NOTE = 'These figures are planning estimates, not verified market prices, quotes, or confirmed bookings.';
 const fmt = { currency: formatCurrency, date: formatDate };
+
+function overviewChip(label, value) {
+  return el('div', { className: 'plan-chip' }, [
+    el('span', { className: 'plan-chip-label', text: label }),
+    el('span', { className: 'plan-chip-value', text: value }),
+  ]);
+}
+
+function overviewChips(event) {
+  const typeLabel = EVENT_TYPES.find((t) => t.value === event.eventType)?.label ?? event.eventType;
+  const chips = [
+    overviewChip('Event type', typeLabel),
+    overviewChip('Date', formatDate(event.eventDate)),
+    overviewChip('Location', event.city),
+    overviewChip('Guests', formatNumber(event.guestCount)),
+  ];
+  if (event.theme) chips.push(overviewChip('Theme', event.theme));
+  chips.push(overviewChip('Budget', formatCurrency(event.budget, event.currency)));
+  return chips;
+}
 
 function textList(title, id, values) {
   return el('article', { className: 'panel', attrs: { 'aria-labelledby': id } }, [
@@ -56,6 +77,9 @@ function render(root, state) {
   if (!hasPlan) return;
 
   const model = buildPlanModel(state.event, state.plan, toISODate(new Date()));
+  const typeLabel = EVENT_TYPES.find((t) => t.value === model.event.eventType)?.label ?? model.event.eventType;
+  root.querySelector('[data-plan-title]').textContent = `${typeLabel} in ${model.event.city}`;
+  root.querySelector('[data-plan-overview]').replaceChildren(...overviewChips(model.event));
   root.querySelector('[data-plan-summary]').textContent = model.summary;
   root.querySelector('[data-plan-theme-name]').textContent = model.theme.name;
   root.querySelector('[data-plan-theme-description]').textContent = model.theme.description;

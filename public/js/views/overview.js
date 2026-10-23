@@ -1,4 +1,5 @@
 import { toISODate } from '../../../shared/dates.js';
+import { EVENT_TYPES } from '../../../shared/constants.js';
 import { el, announce } from '../dom.js';
 import { formatCurrency, formatNumber, formatDate, formatDateTime } from '../format.js';
 import { buildOverview } from './overviewModel.js';
@@ -20,10 +21,34 @@ function detailRow({ term, value, tags }) {
   return [el('dt', { text: term }), el('dd', {}, [content])];
 }
 
+function planPreview(plan) {
+  const summary = typeof plan.eventSummary === 'string' ? plan.eventSummary.trim() : '';
+  const taskCount = Array.isArray(plan.timeline) ? plan.timeline.length : 0;
+  const itemCount = Array.isArray(plan.budget?.items) ? plan.budget.items.length : 0;
+  const meta = [];
+  if (itemCount) meta.push(`${itemCount} budget ${itemCount === 1 ? 'category' : 'categories'}`);
+  if (taskCount) meta.push(`${taskCount} timeline ${taskCount === 1 ? 'task' : 'tasks'}`);
+  return el('div', { className: 'plan-preview-card' }, [
+    el('p', { className: 'plan-preview-label', text: 'Saved plan' }),
+    ...(summary ? [el('p', { className: 'plan-preview-summary', text: summary })] : []),
+    ...(meta.length ? [el('p', { className: 'plan-preview-meta', text: meta.join(' · ') })] : []),
+    el('a', { className: 'btn btn-primary', text: 'View the generated plan', attrs: { href: '#plan' } }),
+  ]);
+}
+
 function render(root, state) {
   const { event, savedAt } = state;
   root.querySelector('[data-overview-empty]').hidden = Boolean(event);
   root.querySelector('[data-overview-content]').hidden = !event;
+  const heading = root.querySelector('#overview-heading');
+  if (heading) {
+    const typeLabel = event
+      ? EVENT_TYPES.find((t) => t.value === event.eventType)?.label
+      : null;
+    heading.textContent = typeLabel
+      ? `Your ${typeLabel.toLowerCase()} at a glance`
+      : 'Your celebration at a glance';
+  }
   if (!event) return;
 
   const model = buildOverview(event, toISODate(new Date()), formatters);
@@ -34,8 +59,8 @@ function render(root, state) {
     : '';
   const planNote = root.querySelector('[data-overview-plan]');
   planNote.replaceChildren(state.plan
-    ? el('a', { text: 'View the generated plan', attrs: { href: '#plan' } })
-    : 'No AI plan yet. Generate one from Event details.');
+    ? planPreview(state.plan)
+    : el('p', { className: 'plan-preview-empty', text: 'No AI plan yet. Generate one from Event details.' }));
 }
 
 export function initOverview(root, store) {

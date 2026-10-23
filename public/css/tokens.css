@@ -2,6 +2,7 @@
   --color-bg: #fbf8f1;
   --color-surface: #ffffff;
   --color-surface-muted: #f5f0e6;
+  --color-surface-hover: #efe8db;
   --color-border: #e6dfd0;
   /* Form control borders need >= 3:1 contrast against the surface (WCAG 1.4.11). */
   --color-border-strong: #857c6e;
@@ -9,12 +10,18 @@
   --color-text-muted: #56636b;
   --color-teal: #0f5e63;
   --color-teal-strong: #0a474b;
+  --color-teal-mid: #137a80;
   --color-teal-soft: #e2efee;
   --color-purple: #6b4e9b;
+  --color-purple-strong: #543d7d;
   --color-purple-soft: #efe9f7;
   --color-danger: #b3261e;
   --color-danger-soft: #fbeceb;
   --color-success: #1e6b3a;
+  --color-success-soft: #e4f2ea;
+  --color-warning: #8a5a00;
+  --color-warning-soft: #fbf0db;
+  --color-track: #ece6da;
   --color-focus: #6b4e9b;
 
   --font-sans: "Inter", "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
@@ -35,10 +42,13 @@
   --radius-sm: 0.5rem;
   --radius-md: 0.875rem;
   --radius-lg: 1.25rem;
+  --radius-pill: 999px;
   --shadow-sm: 0 1px 2px rgba(31, 42, 48, 0.05);
   --shadow-md: 0 6px 24px rgba(31, 42, 48, 0.07);
+  --shadow-lg: 0 12px 40px rgba(31, 42, 48, 0.1);
   --sidebar-width: 15.5rem;
   --focus-ring: 0 0 0 3px var(--color-surface), 0 0 0 5px var(--color-focus);
+  --transition-base: 0.18s ease;
 
   /* Bootstrap integration */
   --bs-body-bg: var(--color-bg);

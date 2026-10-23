@@ -21,6 +21,31 @@ function numberInput(id, value, attrs) {
   });
 }
 
+function breakdownRow(entry, currency) {
+  const bar = el('div', { className: 'budget-bar', attrs: { role: 'presentation' } }, [
+    el('span', {
+      className: 'budget-bar-fill',
+      attrs: { style: `width: ${Math.min(entry.share, 100)}%` },
+    }),
+  ]);
+  return el('li', { className: 'budget-breakdown-row' }, [
+    el('div', { className: 'budget-breakdown-head' }, [
+      el('span', { className: 'budget-breakdown-category', text: entry.category }),
+      el('span', { className: 'budget-breakdown-amount', text: money(entry.estimated, currency) }),
+    ]),
+    bar,
+    el('span', { className: 'budget-breakdown-share', text: `${entry.share}% of plan` }),
+  ]);
+}
+
+function budgetBreakdown(model) {
+  if (!model.budgetBreakdown.length) return null;
+  return el('div', { className: 'budget-breakdown' }, [
+    el('p', { className: 'budget-breakdown-title', text: 'Category breakdown' }),
+    el('ul', { className: 'budget-breakdown-list' }, model.budgetBreakdown.map((entry) => breakdownRow(entry, model.currency))),
+  ]);
+}
+
 export function budgetEditor(model) {
   const totals = el('div', { className: 'stat-grid' }, [
     stat('Estimated total', money(model.allocated, model.currency), model.estimatesOver ? 'Over the budget' : 'Sum of estimates'),
@@ -38,10 +63,12 @@ export function budgetEditor(model) {
     ]),
     ...(item.notes ? [el('p', { className: 'line-notes', text: item.notes })] : []),
   ]));
+  const breakdown = budgetBreakdown(model);
   return el('article', { className: 'panel screen-only', attrs: { 'aria-labelledby': 'plan-budget-heading' } }, [
     el('h2', { className: 'panel-title', text: 'Budget', attrs: { id: 'plan-budget-heading' } }),
     totals,
     el('p', { className: model.matchesTotal && !model.actualOver ? 'plan-note' : 'plan-warning', text: gap, attrs: { role: 'status' } }),
+    ...(breakdown ? [breakdown] : []),
     el('ul', { className: 'edit-list' }, items),
   ]);
 }
@@ -54,13 +81,57 @@ function stat(label, value, meta) {
   ]);
 }
 
+const STATUS_SYMBOLS = Object.freeze({
+  completed: '✓',
+  overdue: '!',
+  today: '●',
+  upcoming: '○',
+  unknown: '–',
+});
+
+function statusBadge(task) {
+  const key = task.completed ? 'completed' : task.status;
+  const label = task.completed ? 'Completed' : task.statusLabel;
+  return el('span', { className: `status-badge status-badge--${key}` }, [
+    el('span', { className: 'status-badge-symbol', attrs: { 'aria-hidden': 'true' }, text: STATUS_SYMBOLS[key] ?? '' }),
+    el('span', { text: label }),
+  ]);
+}
+
+function timelineProgress(completion) {
+  if (!completion.total) return null;
+  const bar = el('div', {
+    className: 'progress-track',
+    attrs: {
+      role: 'progressbar',
+      'aria-valuenow': String(completion.percent),
+      'aria-valuemin': '0',
+      'aria-valuemax': '100',
+      'aria-label': `${completion.completed} of ${completion.total} tasks completed`,
+    },
+  }, [
+    el('span', { className: 'progress-fill', attrs: { style: `width: ${completion.percent}%` } }),
+  ]);
+  return el('div', { className: 'timeline-progress' }, [
+    el('div', { className: 'timeline-progress-head' }, [
+      el('span', { className: 'timeline-progress-label', text: 'Completion' }),
+      el('span', { className: 'timeline-progress-count', text: `${completion.completed} of ${completion.total} tasks · ${completion.percent}%` }),
+    ]),
+    bar,
+  ]);
+}
+
 export function timelineEditor(model) {
   const items = model.timeline.map((task) => {
     const done = el('input', { attrs: { type: 'checkbox', id: `done-${task.id}`, 'data-field': 'completed' } });
     done.checked = task.completed;
     const priority = el('select', { className: 'form-select', attrs: { id: `pri-${task.id}`, 'data-field': 'priority' } }, PRIORITY_VALUES.map((value) => el('option', { text: value[0].toUpperCase() + value.slice(1), attrs: { value, ...(value === task.priority ? { selected: '' } : {}) } })));
-    return el('li', { className: `edit-card edit-card--${task.status}`, attrs: { 'data-task-id': task.id } }, [
-      field(`title-${task.id}`, 'Task', el('input', { className: 'form-control', attrs: { id: `title-${task.id}`, type: 'text', maxlength: '140', value: task.title, 'data-field': 'title' } })),
+    const cardStatus = task.completed ? 'completed' : task.status;
+    return el('li', { className: `edit-card edit-card--${cardStatus}`, attrs: { 'data-task-id': task.id } }, [
+      el('div', { className: 'edit-card-head' }, [
+        field(`title-${task.id}`, 'Task', el('input', { className: 'form-control', attrs: { id: `title-${task.id}`, type: 'text', maxlength: '140', value: task.title, 'data-field': 'title' } })),
+        statusBadge(task),
+      ]),
       el('div', { className: 'edit-grid' }, [
         el('div', { className: 'edit-field edit-check' }, [
           done,
@@ -72,8 +143,10 @@ export function timelineEditor(model) {
       el('p', { className: 'line-meta', text: `${task.deadline ? formatDate(task.deadline) : 'Date unavailable'} · ${task.completed ? 'Completed' : task.statusLabel}` }),
     ]);
   });
+  const progress = timelineProgress(model.completion);
   return el('article', { className: 'panel screen-only', attrs: { 'aria-labelledby': 'plan-timeline-heading' } }, [
     el('h2', { className: 'panel-title', text: 'Timeline', attrs: { id: 'plan-timeline-heading' } }),
+    ...(progress ? [progress] : []),
     el('ul', { className: 'edit-list' }, items),
   ]);
 }

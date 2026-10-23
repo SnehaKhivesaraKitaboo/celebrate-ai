@@ -3,6 +3,221 @@
   gap: var(--space-4);
 }
 
+/* Plan hero: strong title, summary, and real event overview chips. */
+.plan-hero {
+  padding: var(--space-6);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background:
+    radial-gradient(130% 120% at 0% 0%, var(--color-teal-soft) 0%, transparent 45%),
+    var(--color-surface);
+  box-shadow: var(--shadow-md);
+}
+
+.plan-hero-title {
+  margin: var(--space-4) 0 var(--space-2);
+  font-size: clamp(1.5rem, 3vw, var(--font-size-2xl));
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.plan-hero-summary {
+  margin: 0 0 var(--space-4);
+  max-width: 48rem;
+  color: var(--color-text);
+}
+
+.plan-hero-overview {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-3);
+}
+
+.plan-chip {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+}
+
+.plan-chip-label {
+  color: var(--color-text-muted);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.plan-chip-value {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+
+/* Budget: category bar breakdown from real estimates. */
+.budget-breakdown {
+  margin-block-start: var(--space-5);
+}
+
+.budget-breakdown-title {
+  margin: 0 0 var(--space-3);
+  font-weight: 700;
+}
+
+.budget-breakdown-list {
+  display: grid;
+  gap: var(--space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.budget-breakdown-head {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-block-end: var(--space-1);
+}
+
+.budget-breakdown-category {
+  font-weight: 600;
+}
+
+.budget-breakdown-amount {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+
+.budget-bar {
+  height: 0.6rem;
+  border-radius: var(--radius-pill);
+  background: var(--color-track);
+  overflow: hidden;
+}
+
+.budget-bar-fill {
+  display: block;
+  height: 100%;
+  min-width: 2px;
+  border-radius: var(--radius-pill);
+  background: linear-gradient(90deg, var(--color-teal) 0%, var(--color-teal-mid) 100%);
+  transition: width var(--transition-base);
+}
+
+.budget-breakdown-share {
+  display: inline-block;
+  margin-block-start: var(--space-1);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Timeline completion progress. */
+.timeline-progress {
+  margin-block-end: var(--space-4);
+}
+
+.timeline-progress-head {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-block-end: var(--space-2);
+}
+
+.timeline-progress-label {
+  font-weight: 700;
+}
+
+.timeline-progress-count {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  font-variant-numeric: tabular-nums;
+}
+
+.progress-track {
+  height: 0.6rem;
+  border-radius: var(--radius-pill);
+  background: var(--color-track);
+  overflow: hidden;
+}
+
+.progress-fill {
+  display: block;
+  height: 100%;
+  border-radius: var(--radius-pill);
+  background: linear-gradient(90deg, var(--color-success) 0%, #2f8a52 100%);
+  transition: width var(--transition-base);
+}
+
+/* Task status: text + symbol, never color alone. */
+.edit-card-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.edit-card-head .edit-field {
+  flex: 1 1 14rem;
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: 0.15rem var(--space-3);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-pill);
+  background: var(--color-surface-muted);
+  color: var(--color-text);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.status-badge-symbol {
+  font-weight: 700;
+}
+
+.status-badge--completed {
+  border-color: var(--color-success);
+  background: var(--color-success-soft);
+  color: var(--color-success);
+}
+
+.status-badge--overdue {
+  border-color: var(--color-danger);
+  background: var(--color-danger-soft);
+  color: var(--color-danger);
+}
+
+.status-badge--today {
+  border-color: var(--color-warning);
+  background: var(--color-warning-soft);
+  color: var(--color-warning);
+}
+
+.edit-card {
+  border-inline-start: 3px solid transparent;
+  padding-inline-start: var(--space-3);
+}
+
+.edit-card--overdue {
+  border-inline-start-color: var(--color-danger);
+}
+
+.edit-card--today {
+  border-inline-start-color: var(--color-warning);
+}
+
+.edit-card--completed {
+  border-inline-start-color: var(--color-success);
+}
+
 .plan-disclaimer,
 .plan-note,
 .plan-warning {
@@ -85,6 +300,18 @@
   background: var(--color-surface);
   color: var(--color-teal);
   font-weight: 600;
+}
+
+/* Replan section: lavender accent marks the AI action so it is easy to find. */
+.panel--replan {
+  border-inline-start: 4px solid var(--color-purple);
+  background:
+    radial-gradient(130% 120% at 100% 0%, var(--color-purple-soft) 0%, transparent 45%),
+    var(--color-surface);
+}
+
+.panel--replan .panel-title {
+  color: var(--color-purple-strong);
 }
 
 .edit-list,

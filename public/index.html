@@ -55,10 +55,40 @@
             </div>
           </div>
 
-          <div class="empty-state" data-overview-empty>
-            <h2>Start with the essentials</h2>
-            <p>Tell us the type of event, the date, where it is, how many guests, and your budget.</p>
-            <a class="btn btn-primary" href="#event">Add event details</a>
+          <div data-overview-empty>
+            <section class="hero" aria-labelledby="hero-heading">
+              <div class="hero-body">
+                <p class="eyebrow">AI event planner</p>
+                <h2 class="hero-title" id="hero-heading">Plan your next celebration</h2>
+                <p class="hero-lead">Share a few details about your wedding, birthday, anniversary, or community event. CelebrateAI drafts a structured plan with a budget, timeline, and vendor questions you can refine.</p>
+                <div class="hero-actions">
+                  <a class="btn btn-primary btn-lg" href="#event">Plan your next celebration</a>
+                </div>
+              </div>
+              <ol class="how-it-works" aria-label="How the AI planner works">
+                <li class="how-step">
+                  <span class="how-step-num" aria-hidden="true">1</span>
+                  <div>
+                    <p class="how-step-title">Describe the event</p>
+                    <p class="how-step-text">Enter the type, date, city, guest count, and budget.</p>
+                  </div>
+                </li>
+                <li class="how-step">
+                  <span class="how-step-num" aria-hidden="true">2</span>
+                  <div>
+                    <p class="how-step-title">Generate a plan</p>
+                    <p class="how-step-text">AI drafts a budget breakdown, timeline, and vendor questions.</p>
+                  </div>
+                </li>
+                <li class="how-step">
+                  <span class="how-step-num" aria-hidden="true">3</span>
+                  <div>
+                    <p class="how-step-title">Refine and track</p>
+                    <p class="how-step-text">Edit estimates, log actual spend, and tick off tasks.</p>
+                  </div>
+                </li>
+              </ol>
+            </section>
           </div>
 
           <div data-overview-content hidden>
@@ -74,7 +104,7 @@
                 <article class="panel" aria-labelledby="manage-heading">
                   <h2 class="panel-title" id="manage-heading">Manage event</h2>
                   <p class="text-muted-strong" data-overview-saved></p>
-                  <p data-overview-plan></p>
+                  <div class="plan-preview" data-overview-plan></div>
                   <div class="d-flex flex-wrap gap-2">
                     <a class="btn btn-primary" href="#event">Edit details</a>
                     <button class="btn btn-outline-danger" type="button" data-clear-event>Delete saved event</button>
@@ -100,69 +130,83 @@
               <ul data-error-list></ul>
             </div>
 
-            <div class="row g-3">
-              <div class="col-md-6">
-                <label class="form-label" for="event-type">Event type <span class="req" aria-hidden="true">*</span></label>
-                <select class="form-select" id="event-type" name="eventType" required aria-describedby="event-type-error">
-                  <option value="">Select an event type</option>
-                </select>
-                <p class="invalid-feedback" id="event-type-error"></p>
+            <div class="form-section">
+              <div class="form-section-head">
+                <h2 class="form-section-title">The essentials</h2>
+                <p class="form-section-hint">Required to generate a plan.</p>
               </div>
-
-              <div class="col-md-6">
-                <label class="form-label" for="event-date">Event date <span class="req" aria-hidden="true">*</span></label>
-                <input class="form-control" type="date" id="event-date" name="eventDate" required aria-describedby="event-date-error">
-                <p class="invalid-feedback" id="event-date-error"></p>
-              </div>
-
-              <div class="col-md-6">
-                <label class="form-label" for="city">City <span class="req" aria-hidden="true">*</span></label>
-                <input class="form-control" type="text" id="city" name="city" required maxlength="80" autocomplete="address-level2" aria-describedby="city-error">
-                <p class="invalid-feedback" id="city-error"></p>
-              </div>
-
-              <div class="col-md-6">
-                <label class="form-label" for="guest-count">Number of guests <span class="req" aria-hidden="true">*</span></label>
-                <input class="form-control" type="number" id="guest-count" name="guestCount" required min="1" max="5000" step="1" inputmode="numeric" aria-describedby="guest-count-error">
-                <p class="invalid-feedback" id="guest-count-error"></p>
-              </div>
-
-              <div class="col-md-8">
-                <label class="form-label" for="budget">Total budget <span class="req" aria-hidden="true">*</span></label>
-                <input class="form-control" type="number" id="budget" name="budget" required min="1" step="any" inputmode="decimal" aria-describedby="budget-error">
-                <p class="invalid-feedback" id="budget-error"></p>
-              </div>
-
-              <div class="col-md-4">
-                <label class="form-label" for="currency">Currency <span class="req" aria-hidden="true">*</span></label>
-                <select class="form-select" id="currency" name="currency" required aria-describedby="currency-error"></select>
-                <p class="invalid-feedback" id="currency-error"></p>
-              </div>
-
-              <div class="col-12">
-                <label class="form-label" for="theme">Theme or style <span class="optional">(optional)</span></label>
-                <input class="form-control" type="text" id="theme" name="theme" maxlength="80" aria-describedby="theme-hint theme-error">
-                <p class="form-hint" id="theme-hint">For example: rustic garden, Bollywood night, minimalist.</p>
-                <p class="invalid-feedback" id="theme-error"></p>
-              </div>
-
-              <div class="col-12">
-                <fieldset aria-describedby="dietary-error">
-                  <legend class="form-label">Dietary preferences <span class="optional">(optional)</span></legend>
-                  <div class="check-grid" data-dietary-options></div>
-                  <p class="invalid-feedback" id="dietary-error"></p>
-                </fieldset>
-              </div>
-
-              <div class="col-12">
-                <label class="form-label" for="special-requirements">Special requirements <span class="optional">(optional)</span></label>
-                <textarea class="form-control" id="special-requirements" name="specialRequirements" rows="4" maxlength="500"
-                          aria-describedby="special-hint special-count special-error"></textarea>
-                <div class="d-flex justify-content-between gap-3">
-                  <p class="form-hint" id="special-hint">Accessibility needs, venue preferences, cultural rituals. Please don't include names or contact details.</p>
-                  <p class="form-hint text-nowrap" id="special-count" data-char-count></p>
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <label class="form-label" for="event-type">Event type <span class="req" aria-hidden="true">*</span></label>
+                  <select class="form-select" id="event-type" name="eventType" required aria-describedby="event-type-error">
+                    <option value="">Select an event type</option>
+                  </select>
+                  <p class="invalid-feedback" id="event-type-error"></p>
                 </div>
-                <p class="invalid-feedback" id="special-error"></p>
+
+                <div class="col-md-6">
+                  <label class="form-label" for="event-date">Event date <span class="req" aria-hidden="true">*</span></label>
+                  <input class="form-control" type="date" id="event-date" name="eventDate" required aria-describedby="event-date-error">
+                  <p class="invalid-feedback" id="event-date-error"></p>
+                </div>
+
+                <div class="col-md-6">
+                  <label class="form-label" for="city">City <span class="req" aria-hidden="true">*</span></label>
+                  <input class="form-control" type="text" id="city" name="city" required maxlength="80" autocomplete="address-level2" aria-describedby="city-error">
+                  <p class="invalid-feedback" id="city-error"></p>
+                </div>
+
+                <div class="col-md-6">
+                  <label class="form-label" for="guest-count">Number of guests <span class="req" aria-hidden="true">*</span></label>
+                  <input class="form-control" type="number" id="guest-count" name="guestCount" required min="1" max="5000" step="1" inputmode="numeric" aria-describedby="guest-count-error">
+                  <p class="invalid-feedback" id="guest-count-error"></p>
+                </div>
+
+                <div class="col-md-8">
+                  <label class="form-label" for="budget">Total budget <span class="req" aria-hidden="true">*</span></label>
+                  <input class="form-control" type="number" id="budget" name="budget" required min="1" step="any" inputmode="decimal" aria-describedby="budget-error">
+                  <p class="invalid-feedback" id="budget-error"></p>
+                </div>
+
+                <div class="col-md-4">
+                  <label class="form-label" for="currency">Currency <span class="req" aria-hidden="true">*</span></label>
+                  <select class="form-select" id="currency" name="currency" required aria-describedby="currency-error"></select>
+                  <p class="invalid-feedback" id="currency-error"></p>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-section">
+              <div class="form-section-head">
+                <h2 class="form-section-title">Make it yours</h2>
+                <p class="form-section-hint">Optional, but it helps the plan fit your event.</p>
+              </div>
+              <div class="row g-3">
+                <div class="col-12">
+                  <label class="form-label" for="theme">Theme or style <span class="optional">(optional)</span></label>
+                  <input class="form-control" type="text" id="theme" name="theme" maxlength="80" aria-describedby="theme-hint theme-error">
+                  <p class="form-hint" id="theme-hint">For example: rustic garden, Bollywood night, minimalist.</p>
+                  <p class="invalid-feedback" id="theme-error"></p>
+                </div>
+
+                <div class="col-12">
+                  <fieldset aria-describedby="dietary-error">
+                    <legend class="form-label">Dietary preferences <span class="optional">(optional)</span></legend>
+                    <div class="check-grid" data-dietary-options></div>
+                    <p class="invalid-feedback" id="dietary-error"></p>
+                  </fieldset>
+                </div>
+
+                <div class="col-12">
+                  <label class="form-label" for="special-requirements">Special requirements <span class="optional">(optional)</span></label>
+                  <textarea class="form-control" id="special-requirements" name="specialRequirements" rows="4" maxlength="500"
+                            aria-describedby="special-hint special-count special-error"></textarea>
+                  <div class="d-flex justify-content-between gap-3">
+                    <p class="form-hint" id="special-hint">Accessibility needs, venue preferences, cultural rituals. Please don't include names or contact details.</p>
+                    <p class="form-hint text-nowrap" id="special-count" data-char-count></p>
+                  </div>
+                  <p class="invalid-feedback" id="special-error"></p>
+                </div>
               </div>
             </div>
 
@@ -190,15 +234,16 @@
           </div>
 
           <div class="plan-stack" data-plan-content hidden>
-            <p class="plan-disclaimer screen-only" data-plan-disclaimer></p>
-            <p class="plan-note screen-only" data-plan-estimate-note></p>
-            <article class="panel screen-only" aria-labelledby="plan-summary-heading">
-              <h2 class="panel-title" id="plan-summary-heading">Summary</h2>
-              <p data-plan-summary></p>
+            <article class="plan-hero screen-only" aria-labelledby="plan-summary-heading">
+              <div class="plan-hero-overview" data-plan-overview></div>
+              <h2 class="plan-hero-title" id="plan-summary-heading" data-plan-title></h2>
+              <p class="plan-hero-summary" data-plan-summary></p>
               <h3 class="line-title" data-plan-theme-name></h3>
               <p data-plan-theme-description></p>
               <ul class="tag-list" data-plan-palette></ul>
             </article>
+            <p class="plan-disclaimer screen-only" data-plan-disclaimer></p>
+            <p class="plan-note screen-only" data-plan-estimate-note></p>
             <div data-plan-budget></div>
             <div data-plan-timeline></div>
             <div data-plan-vendors></div>
@@ -206,8 +251,8 @@
               <div data-plan-ideas></div>
               <div data-plan-assumptions></div>
             </div>
-            <section class="panel no-print" aria-labelledby="replan-heading">
-              <h2 class="panel-title" id="replan-heading">Adjust the plan</h2>
+            <section class="panel panel--replan no-print" aria-labelledby="replan-heading">
+              <h2 class="panel-title" id="replan-heading">Replan with AI</h2>
               <p class="plan-note">Describe one change. Guest count, budget, and other details stay as they are unless you ask to change them.</p>
               <form data-replan-form>
                 <label class="form-label" for="replan-change">What should change?</label>
